@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tạo Mô Tả Sản Phẩm E-commerce</title>
+    <link rel="stylesheet" href="css.css">
+</head>
+<body>
+    <header>
+        <h1>CÔNG CỤ TẠO MÔ TẢ SẢN PHẨM E-COMMERCE</h1>
+        <nav>
+            <a href="#productForm">Tạo mô tả</a> | <a href="#freeTools">Về chúng tôi</a> | <a href="#products">Sản Phẩm</a> | <a href="#tips">Lời Khuyên</a> | <a href="#contact">Liên Hệ</a>
+        </nav>
+    </header>
+    <form id="productForm">
+        <label for="productName">Tên sản phẩm:</label>
+        <input type="text" id="productName" placeholder="Nhập tên sản phẩm của bạn" required oninput="checkFormCompletion()">
+
+        <label for="productImageFile">Upload ảnh sản phẩm:</label>
+        <div class="upload-container">
+            <button type="button" class="upload-btn" onclick="toggleUploadOptions()">+</button>
+            <div id="uploadOptions" class="upload-options" style="display:none;">
+                <button type="button" onclick="selectFromLibrary()" style="color:black;">Chọn ảnh từ thư viện ảnh</button>
+                <button type="button" onclick="takePhoto()" style="color:black;">Chụp ảnh</button>
+                <button type="button" onclick="selectFile()" style="color:black;">Chọn tệp</button>
+            </div>
+        </div>
+        <input type="file" id="productImageFile" accept="image/*" style="display:none;" onchange="previewImage()">
+        <input type="file" id="cameraFile" accept="image/*" capture="environment" style="display:none;" onchange="previewImage()">
+        <img id="imagePreview" style="display:none; max-width:200px; margin-top:10px; border-radius:10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <button onclick="describeFromImage()">Mô tả từ ảnh</button>
+
+        <label for="productImage">Hoặc nhập URL hình ảnh sản phẩm:</label>
+        <input type="url" id="productImage" placeholder="Ví dụ: https://example.com/image.jpg">
+
+        <label for="features">Các tính năng chính (liệt kê, mỗi dòng một):</label>
+        <textarea id="features" rows="5" placeholder="Ví dụ:\nChất liệu cotton thoáng mát\nThiết kế đơn giản\nMàu sắc đa dạng" required oninput="checkFormCompletion()"></textarea>
+
+        <label for="benefits">Lợi ích chính cho khách hàng:</label>
+        <textarea id="benefits" rows="3" placeholder="Ví dụ: Phù hợp cho mọi hoạt động hàng ngày, dễ chịu khi mặc." required oninput="checkFormCompletion()"></textarea>
+
+        <label for="apiKey">API Key (Hỗ trợ cả Google AI Studio / Gemini hoặc OpenAI):</label>
+        <input type="password" id="apiKey" placeholder="sk-... (để trống nếu không có)">
+        <div id="keywords">
+            <label><input type="checkbox" value="SEO"> SEO</label>
+            <label><input type="checkbox" value="E-commerce"> E-commerce</label>
+            <label><input type="checkbox" value="Sản phẩm"> Sản phẩm</label>
+            <label><input type="checkbox" value="Mua hàng"> Mua hàng</label>
+            <label><input type="checkbox" value="Giá rẻ"> Giá rẻ</label>
+            <label><input type="checkbox" value="Chất lượng"> Chất lượng</label>
+            <label><input type="checkbox" value="Giao hàng"> Giao hàng</label>
+            <label><input type="checkbox" value="Khuyến mãi"> Khuyến mãi</label>
+        </div>
+
+        <div id="buttonContainer">
+            <button type="button" id="generateBtn" disabled>Tạo Mô Tả</button>
+            <div id="output" style="display: none; margin-top: 30px; padding: 25px; border: none; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-left: 6px solid #007bff; transition: all 0.3s ease;">
+                <h3 style="margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">✨ Kết Quả Mô Tả Sản Phẩm</h3>
+                <div id="descriptionText" style="white-space: pre-wrap; line-height: 1.6; color: #444; font-size: 16px; margin: 20px 0; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; max-height: 400px; overflow-y: auto;"></div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="button" id="copyBtn" onclick="copyDescription()" style="display: flex; align-items: center; gap: 8px; background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">📋 Sao Chép Nhanh</button>
+                    <button type="button" onclick="formatToHTML()" style="padding: 10px 20px; border: 1px solid #007bff; background: transparent; color: #007bff; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">🌐 Định Dạng Sang HTML</button>
+                    <button type="button" onclick="evaluatePotential()" style="padding: 10px 20px; border: 1px solid #ffc107; background: transparent; color: #d39e00; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">⭐ Đánh Giá Tiềm Năng</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div id="freeTools">
+        <h2>Về chúng tôi</h2>
+        <p>Chúng tôi là đội ngũ chuyên gia trong lĩnh vực marketing kỹ thuật số và công nghệ AI, cam kết cung cấp các công cụ và giải pháp sáng tạo để giúp doanh nghiệp tạo nội dung chất lượng cao, tối ưu hóa SEO, và thúc đẩy bán hàng trực tuyến. Với kinh nghiệm dày dặn, chúng tôi hỗ trợ hàng nghìn khách hàng đạt được mục tiêu kinh doanh.</p>
+        <p><strong>Lĩnh vực hoạt động:</strong> Sales, CRM, Phân tích kinh doanh, Quản lý rủi ro.</p>
+    </div>
+
+    <div id="counters">
+        <h2>Thành tựu của chúng tôi</h2>
+        <div class="counter-grid">
+            <div class="counter-item">
+                <div class="counter-number" data-target="32000">0</div>
+                <p>Số lượt mô tả</p>
+            </div>
+            <div class="counter-item">
+                <div class="counter-number" data-target="9800">0</div>
+                <p>Số từ tiết kiệm</p>
+            </div>
+            <div class="counter-item">
+                <div class="counter-number" data-target="90">0</div>
+                <p>Tiềm năng (%)</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="products">
+        <h2>Sản phẩm của chúng tôi</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <h3>Công cụ tạo tên thương hiệu</h3>
+                <p>Tạo ra các ý tưởng tên thương hiệu sáng tạo và độc đáo cho doanh nghiệp của bạn. Dễ dàng sử dụng và tùy chỉnh theo nhu cầu.</p>
+                <button onclick="alert('Truy cập Công Cụ Tạo Tên Thương Hiệu')">Truy Cập</button>
+            </div>
+            <div class="product-card">
+                <h3>Công cụ tạo tên doanh nghiệp</h3>
+                <p>Giúp bạn brainstorm và tạo tên doanh nghiệp phù hợp, chuyên nghiệp và dễ nhớ.</p>
+                <button onclick="alert('Truy cập Công Cụ Tạo Tên Doanh Nghiệp')">Truy Cập</button>
+            </div>
+            <div class="product-card">
+                <h3>Tạo nội dung quảng cáo Google</h3>
+                <p>Tạo nội dung quảng cáo hiệu quả cho Google Ads, tối ưu hóa để tăng tỷ lệ chuyển đổi.</p>
+                <button onclick="alert('Truy cập Tạo Nội Dung Quảng Cáo Google')">Truy Cập</button>
+            </div>
+            <div class="product-card">
+                <h3>Tạo nội dung quảng cáo Facebook</h3>
+                <p>Thiết kế nội dung quảng cáo hấp dẫn cho Facebook, thu hút tương tác và bán hàng.</p>
+                <button onclick="alert('Truy cập Tạo Nội Dung Quảng Cáo Facebook')">Truy Cập</button>
+            </div>
+            <div class="product-card">
+                <h3>Công cụ tạo nội dung trang web</h3>
+                <p>Tạo nội dung chất lượng cho website, bao gồm bài viết, mô tả và SEO tối ưu.</p>
+                <button onclick="alert('Truy cập Công Cụ Tạo Nội Dung Trang Web')">Truy Cập</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="faqBlock">
+        <h3>Câu hỏi thường gặp</h3>
+        <ul class="faq-list">
+            <li>
+                <a href="#" class="faq-link" onclick="toggleFaqAnswer(this); return false;">1. Trình tạo mô tả sản phẩm AI hoạt động như thế nào?</a>
+                <div class="faq-answer" style="display: none; padding-top: 10px; color: #555;">Hệ thống sử dụng trí tuệ nhân tạo để phân tích các từ khóa, tính năng và lợi ích bạn nhập vào, từ đó tự động viết ra các đoạn mô tả hấp dẫn và chuẩn SEO.</div>
+            </li>
+            <li>
+                <a href="#" class="faq-link" onclick="toggleFaqAnswer(this); return false;">2. Trình tạo mô tả sản phẩm được sử dụng miễn phí không?</a>
+                <div class="faq-answer" style="display: none; padding-top: 10px; color: #555;">Có, chúng tôi cung cấp chế độ tạo tự động (offline) hoàn toàn miễn phí. Để dùng mô hình cao cấp hơn, bạn có thể nhập API Key của riêng mình.</div>
+            </li>
+            <li>
+                <a href="#" class="faq-link" onclick="toggleFaqAnswer(this); return false;">3. Tôi có thể tùy chỉnh các mô tả được tạo không?</a>
+                <div class="faq-answer" style="display: none; padding-top: 10px; color: #555;">Hoàn toàn có thể. Kết quả được trả về dưới dạng văn bản, bạn có thể dễ dàng sao chép và chỉnh sửa theo phong cách riêng trước khi sử dụng.</div>
+            </li>
+            <li>
+                <a href="#" class="faq-link" onclick="toggleFaqAnswer(this); return false;">4. Làm thế nào để tạo mô tả sản phẩm?</a>
+                <div class="faq-answer" style="display: none; padding-top: 10px; color: #555;">Rất đơn giản! Điền tên sản phẩm, các tính năng nổi bật, lợi ích chính, và nhấn nút "Tạo Mô Tả". Công cụ sẽ lo phần còn lại.</div>
+            </li>
+        </ul>
+    </div>
+
+    <div id="tips">
+        <h2>Nhận những lời khuyên hữu ích từ các tác giả của V-ecommerce</h2>
+        <ul class="tips-list">
+            <li><a href="#" class="tip-link">6 mẹo quan trọng để viết mô tả sản phẩm tuyệt vời</a></li>
+            <li><a href="#" class="tip-link">SEO trang sản phẩm: cấu trúc của một trang được tối ưu hóa tốt</a></li>
+            <li><a href="#" class="tip-link">13 cách hiệu quả, tiết kiệm chi phí để quảng bá sản phẩm</a></li>
+        </ul>
+    </div>
+
+    
+
+    <div id="evaluation" style="display: none;">
+        <h2>Kết Quả Đánh Giá</h2>
+        <p id="evaluationResult"></p>
+    </div>
+
+    <script>
+        // Global variable to store the current generated description
+        let currentDescription = '';
+
+        /**
+         * Checks if required fields are filled and enables/disables the generate button
+         */
+        function checkFormCompletion() {
+            const productName = document.getElementById('productName').value.trim();
+            const features = document.getElementById('features').value.trim();
+            const benefits = document.getElementById('benefits').value.trim();
+            const button = document.getElementById('generateBtn');
+
+            if (productName && features && benefits) {
+                button.disabled = false;
+            } else {
+                button.disabled = true;
+            }
+        }
+
+        /**
+         * Generates product description based on user inputs
+         * Uses OpenAI API if key is provided, otherwise fallbacks to simple simulation
+         */
+        async function generateDescription(event) {
+            if (event) event.preventDefault();
+            const button = document.getElementById('generateBtn');
+            button.disabled = true;
+            button.innerText = 'Đang tạo...';
+
+            const productName = document.getElementById('productName').value;
+            const featuresArray = document.getElementById('features').value.split('\n').filter(f => f.trim());
+            const benefits = document.getElementById('benefits').value;
+            const keywordCheckboxes = document.querySelectorAll('#keywords input[type="checkbox"]:checked');
+            const keywords = Array.from(keywordCheckboxes).map(cb => cb.value);
+            const productImage = document.getElementById('productImage').value;
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            if (apiKey) {
+                try {
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-3.5-turbo',
+                            messages: [{
+                                role: 'system',
+                                content: 'Bạn là một chuyên gia viết Content Marketing và SEO chuyên nghiệp cho E-commerce.'
+                            }, {
+                                role: 'user',
+                                content: `Hãy viết mô tả sản phẩm thật hấp dẫn, chuyên nghiệp và thuyết phục khách hàng mua.\n\nTên sản phẩm: ${productName}\nTính năng nổi bật:\n${featuresArray.map(f => '- ' + f).join('\n')}\nLợi ích chính: ${benefits}\nTừ khóa SEO cần chèn: ${keywords.join(', ')}\n\nHãy tạo 2 phiên bản khác nhau: Phiên bản 1 (Chi tiết & Cảm xúc), Phiên bản 2 (Ngắn gọn & Tập trung tính năng).`
+                            }],
+                            temperature: 0.7
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(response.statusText);
+
+                    const data = await response.json();
+                    currentDescription = data.choices[0].message.content;
+                    if (productImage) currentDescription += `\n\n[Hình ảnh tham khảo: ${productImage}]`;
+                    
+                    showGeneratedResult();
+                } catch (error) {
+                    console.error('Lỗi OpenAI:', error);
+                    alert('Không thể kết nối với OpenAI (Sai API Key hoặc lỗi mạng). Đang dùng chế độ tạo tự động offline...');
+                    fallbackGenerate(productName, featuresArray, benefits, keywords, productImage);
+                }
+            } else {
+                // Mô phỏng tạo mô tả offline (fallback)
+                setTimeout(() => {
+                    fallbackGenerate(productName, featuresArray, benefits, keywords, productImage);
+                }, 1000);
+            }
+        }
+
+        function fallbackGenerate(productName, features, benefits, keywords, productImage) {
+            let description = `Khám phá ${productName}, sản phẩm tuyệt vời với các tính năng nổi bật:\n\n`;
+            features.forEach(f => {
+                description += `- ${f}\n`;
+            });
+            description += `\n${benefits}\n\n`;
+            if (keywords.length > 0) description += `Từ khóa: ${keywords.join(', ')}.`;
+            if (productImage) description += `\n\nHình ảnh: ${productImage}`;
+
+            let version2 = `Giới thiệu ${productName} - ${keywords.length > 0 ? keywords[0] : 'sản phẩm'} hàng đầu. Tính năng:\n\n`;
+            features.forEach(f => {
+                version2 += `- ${f}\n`;
+            });
+            version2 += `\nLợi ích: ${benefits}\n\nTìm hiểu thêm về ${keywords.slice(0,2).join(' và ')}.`;
+            if (productImage) version2 += `\n\nHình ảnh: ${productImage}`;
+
+            currentDescription = description + '\n\n--- Phiên bản 2 ---\n\n' + version2;
+            showGeneratedResult();
+        }
+
+        function showGeneratedResult() {
+            document.getElementById('descriptionText').innerText = currentDescription;
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('evaluation').style.display = 'none';
+
+            const button = document.getElementById('generateBtn');
+            button.disabled = false;
+            button.innerText = 'Tạo Mô Tả';
+        }
+
+        /**
+         * Copies the current description to clipboard
+         */
+        function copyDescription() {
+            navigator.clipboard.writeText(currentDescription).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✓ Đã sao chép!';
+                btn.style.backgroundColor = '#218838';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.backgroundColor = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                console.error('Lỗi khi sao chép: ', err);
+                alert('Có lỗi xảy ra khi sao chép!');
+            });
+        }
+
+        /**
+         * Formats the description to HTML and displays it
+         */
+        function formatToHTML() {
+            const html = currentDescription.replace(/\n/g, '<br>');
+            document.getElementById('descriptionText').innerHTML = html;
+        }
+
+        /**
+         * Evaluates purchase potential based on description length and keywords
+         */
+        function evaluatePotential() {
+            // Simple evaluation based on length and keywords
+            const length = currentDescription.length;
+            const keywordCount = (currentDescription.match(/từ khóa|SEO/gi) || []).length;
+            let score = 5; // base
+            if (length > 200) score += 2;
+            if (keywordCount > 0) score += 1;
+            if (score > 10) score = 10;
+
+            const reason = `Độ dài mô tả: ${length} ký tự. Số từ khóa tích hợp: ${keywordCount}. Mô tả chi tiết và hấp dẫn sẽ tăng tiềm năng mua hàng.`;
+
+            document.getElementById('evaluationResult').innerText = `Điểm tiềm năng mua hàng: ${score}/10\nLý do: ${reason}`;
+            document.getElementById('evaluation').style.display = 'block';
+        }
+
+        /**
+         * Previews the selected image
+         */
+        function previewImage() {
+            const file = document.getElementById('productImageFile').files[0] || document.getElementById('cameraFile').files[0];
+            if (file) {
+                const img = document.getElementById('imagePreview');
+                img.src = URL.createObjectURL(file);
+                img.style.display = 'block';
+            }
+        }
+
+        /**
+         * Describes product from uploaded image (simulated)
+         */
+        function describeFromImage() {
+            const file1 = document.getElementById('productImageFile').files[0];
+            const file2 = document.getElementById('cameraFile').files[0];
+            const file = file1 || file2;
+            if (file) {
+                // Mô phỏng AI description
+                alert('Đang phân tích ảnh... Mô tả sản phẩm: Chiếc áo thun cotton màu xanh, thiết kế đơn giản, phù hợp cho mùa hè. Giá trị ước tính: 250k - 350k.');
+                // Tự động điền vào form
+                document.getElementById('productName').value = 'Áo Thun Cotton Màu Xanh';
+                document.getElementById('features').value = 'Chất liệu cotton thoáng mát\nThiết kế đơn giản\nMàu xanh dương';
+                document.getElementById('benefits').value = 'Phù hợp cho mọi hoạt động hàng ngày, dễ chịu khi mặc.';
+            } else {
+                alert('Vui lòng upload ảnh trước.');
+            }
+        }
+
+        function toggleFaqAnswer(button) {
+            const answer = button.nextElementSibling;
+            if (!answer) return;
+            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleUploadOptions() {
+            const options = document.getElementById('uploadOptions');
+            options.style.display = options.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function selectFromLibrary() {
+            document.getElementById('productImageFile').click();
+            document.getElementById('uploadOptions').style.display = 'none';
+        }
+
+        function takePhoto() {
+            document.getElementById('cameraFile').click();
+            document.getElementById('uploadOptions').style.display = 'none';
+        }
+
+        function selectFile() {
+            document.getElementById('productImageFile').click();
+            document.getElementById('uploadOptions').style.display = 'none';
+        }
+
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter-number');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                let current = 0;
+                const increment = target / 100;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    if (target === 90) {
+                        counter.innerText = Math.floor(current) + '%';
+                    } else {
+                        counter.innerText = Math.floor(current).toLocaleString();
+                    }
+                }, 20);
+            });
+        }
+
+        // Initialize counters on page load
+        window.addEventListener('load', function() {
+            animateCounters();
+            checkFormCompletion();
+            // Add event listener to button
+            document.getElementById('generateBtn').addEventListener('click', generateDescription);
+        });
+    </script>
+
+    <footer id="contact">
+        <h3>Liên Hệ Với Chúng Tôi</h3>
+        <p>Email: contact@example.com</p>
+        <p>Điện thoại: 0123-456-789</p>
+        <p>Địa chỉ: 175 Tây Sơn, phường Kim Liên, thành phố Hà Nội</p>
+    </footer>
+</body>
+</html>
